@@ -6,7 +6,26 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from pyinegi.exceptions import InvalidResponseError
-from pyinegi.models import IndicatorSeries, Observation
+from pyinegi.models import CatalogEntry, IndicatorSeries, Observation
+
+
+def parse_catalog_response(payload: dict[str, Any]) -> tuple[CatalogEntry, ...]:
+    """Parse a JSON metadata catalog response into immutable typed models."""
+    raw = payload.get("CODE")
+    if isinstance(raw, dict):
+        raw = [raw]
+    if not isinstance(raw, list):
+        raise InvalidResponseError("The INEGI response does not contain a valid 'CODE' list.")
+    result = []
+    for item in raw:
+        if not isinstance(item, dict):
+            raise InvalidResponseError("The INEGI response contains an invalid catalog record.")
+        value = _text(item.get("Value", item.get("value")))
+        description = _text(item.get("Description", item.get("description")))
+        if value is None or description is None:
+            raise InvalidResponseError("The INEGI response contains an incomplete catalog record.")
+        result.append(CatalogEntry(value, description))
+    return tuple(result)
 
 
 def parse_indicator_response(payload: dict[str, Any]) -> tuple[IndicatorSeries, ...]:

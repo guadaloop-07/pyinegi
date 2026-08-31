@@ -5,6 +5,7 @@ import requests
 
 from pyinegi import (
     AuthenticationError,
+    CatalogEntry,
     InegiClient,
     InvalidRequestError,
     InvalidResponseError,
@@ -55,6 +56,42 @@ def test_get_indicator_builds_url_and_parses_response():
     assert "/INDICATOR/1002000001/es/00/false/BISE/2.0/secret" in session.calls[0][0]
     assert session.calls[0][1]["params"] == {"type": "json"}
     assert result[0].observations[0].value == Decimal("10")
+
+
+def test_get_catalog_builds_url_and_parses_records():
+    session = Session(
+        [Response(200, {"CODE": [{"Value": "1002000001", "Description": "Población total"}]})]
+    )
+    result = InegiClient("secret", session=session).get_catalog("CL_INDICATOR", "1002000001")
+    assert "/CL_INDICATOR/1002000001/es/BISE/2.0/secret" in session.calls[0][0]
+    assert result == (CatalogEntry("1002000001", "Población total"),)
+
+
+def test_get_catalog_supports_all_records_and_validates_arguments():
+    session = Session([Response(200, {"CODE": [{"value": 96, "description": "Personas"}]})])
+    result = InegiClient("token", session=session).get_catalog("CL_UNIT", language="en")
+    assert "/CL_UNIT/null/en/BISE/2.0/token" in session.calls[0][0]
+    assert result[0].value == "96"
+    client = InegiClient("token")
+    with pytest.raises(InvalidRequestError):
+        client.get_catalog("CL_UNKNOWN")
+    with pytest.raises(InvalidRequestError):
+        client.get_catalog("CL_UNIT", "96/invalid")
+    with pytest.raises(InvalidRequestError):
+        client.get_catalog("CL_UNIT", language="fr")
+
+
+def test_get_catalog_rejects_invalid_records():
+    client = InegiClient(
+        "token",
+        session=Session(
+            [Response(200, {"CODE": [{"Value": "96"}]}), Response(200, {"CODE": "bad"})]
+        ),
+    )
+    with pytest.raises(InvalidResponseError):
+        client.get_catalog("CL_UNIT", "96")
+    with pytest.raises(InvalidResponseError):
+        client.get_catalog("CL_UNIT", "96")
 
 
 def test_latest_and_environment_token(monkeypatch):
