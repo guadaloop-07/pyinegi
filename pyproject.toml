@@ -15,7 +15,7 @@ dependencies = ["requests>=2.31"]
 
 [project.optional-dependencies]
 pandas = ["pandas>=2.0"]
-dev = ["mypy>=1.13", "pandas>=2.0", "pandas-stubs>=2.2", "pre-commit>=4.0", "pytest>=8.3", "pytest-cov>=6.0", "twine>=6.0", "types-requests>=2.32"]
+dev = ["mypy>=1.13", "pandas>=2.0", "pandas-stubs>=2.2", "pre-commit>=4.0", "pytest>=8.3", "pytest-cov>=6.0", "ruff>=0.8", "twine>=6.0", "types-requests>=2.32"]
 
 [project.urls]
 Documentation = "https://github.com/guadaloop-07/pyinegi#readme"
