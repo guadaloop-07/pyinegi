@@ -18,6 +18,14 @@ class Observation:
 
 
 @dataclass(frozen=True, slots=True)
+class CatalogEntry:
+    """One value and description returned by an INEGI metadata catalog."""
+
+    value: str
+    description: str
+
+
+@dataclass(frozen=True, slots=True)
 class IndicatorSeries:
     """Indicator metadata and its observations for a geographic area."""
 

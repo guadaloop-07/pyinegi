@@ -26,6 +26,17 @@ for observation in series[0].observations:
 
 Install `pyinegi[pandas]` to use `pyinegi.pandas.to_dataframe`.
 
+## Metadata catalogs
+
+Retrieve indicator metadata or another documented catalog with `get_catalog`:
+
+```python
+entries = InegiClient().get_catalog("CL_INDICATOR", "1002000001")
+print(entries[0].description)
+```
+
+Pass `record_id=None` to retrieve every record in a supported catalog.
+
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). The project uses protected-main pull requests, English Conventional Commits, pre-commit hooks, and GitHub Actions quality gates.

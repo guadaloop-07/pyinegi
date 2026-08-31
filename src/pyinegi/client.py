@@ -17,10 +17,13 @@ from pyinegi.exceptions import (
     InvalidResponseError,
     RateLimitError,
 )
-from pyinegi.models import IndicatorSeries
-from pyinegi.parsing import parse_indicator_response
+from pyinegi.models import CatalogEntry, IndicatorSeries
+from pyinegi.parsing import parse_catalog_response, parse_indicator_response
 
 DEFAULT_BASE_URL = "https://www.inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml"
+_SUPPORTED_CATALOGS = frozenset(
+    {"CL_FREQ", "CL_GEO_AREA", "CL_INDICATOR", "CL_NOTE", "CL_SOURCE", "CL_TOPIC", "CL_UNIT"}
+)
 
 
 class InegiClient:
@@ -83,6 +86,26 @@ class InegiClient:
             f"/{data_source}/2.0/{self.token}"
         )
         return parse_indicator_response(self._get_json(path))
+
+    def get_catalog(
+        self,
+        catalog: str,
+        record_id: str | None = None,
+        *,
+        language: str = "es",
+        source: str = "BISE",
+    ) -> tuple[CatalogEntry, ...]:
+        """Return one or all records from a documented INEGI metadata catalog."""
+        if language not in {"es", "en"}:
+            raise InvalidRequestError("language must be either 'es' or 'en'.")
+        catalog_name = _segment(catalog, "catalog").upper()
+        if catalog_name not in _SUPPORTED_CATALOGS:
+            supported = ", ".join(sorted(_SUPPORTED_CATALOGS))
+            raise InvalidRequestError(f"catalog must be one of: {supported}.")
+        identifier = "null" if record_id is None else _segment(record_id, "record_id")
+        data_source = _segment(source, "source")
+        path = f"/{catalog_name}/{identifier}/{language}/{data_source}/2.0/{self.token}"
+        return parse_catalog_response(self._get_json(path))
 
     def get_latest_indicator(
         self,

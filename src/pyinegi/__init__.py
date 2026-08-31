@@ -9,10 +9,11 @@ from pyinegi.exceptions import (
     InvalidResponseError,
     RateLimitError,
 )
-from pyinegi.models import IndicatorSeries, Observation
+from pyinegi.models import CatalogEntry, IndicatorSeries, Observation
 
 __all__ = [
     "AuthenticationError",
+    "CatalogEntry",
     "IndicatorNotFoundError",
     "IndicatorSeries",
     "InegiClient",
