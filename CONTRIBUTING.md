@@ -1,8 +1,45 @@
 # Contributing to pyinegi
+
 Write code, issues, pull requests, commit messages, and documentation in English.
 
-Install [uv](https://docs.astral.sh/uv/), then run `uv sync --all-extras --dev` and `uv run pre-commit install`.
+## Development environment
 
-Before opening a PR, run `uv run ruff format --check .`, `uv run ruff check .`, `uv run mypy`, and `uv run pytest`.
+pyinegi supports Python 3.10 through 3.13. Python 3.12 is the recommended local default because it is also used by the type-checking configuration.
 
-Use a short-lived `feature/`, `fix/`, `docs/`, or `chore/` branch. Link an issue and use English Conventional Commits, such as `feat: add catalog client`. Do not commit API tokens.
+Install [uv](https://docs.astral.sh/uv/), then create a seeded virtual environment and synchronize the project:
+
+```console
+uv python install 3.12
+uv sync --python 3.12 --all-extras --dev
+uv venv --python 3.12 --seed --allow-existing
+```
+
+`--all-extras` installs both the optional pandas support and the development tools. `uv sync` is exact, so run the final `uv venv --seed --allow-existing` command to ensure `pip` is present in `.venv` for direct package-management commands such as `.venv/bin/python -m pip install ...`. Use `uv sync` for normal dependency changes; rerun the seed command afterward if a subsequent sync removes `pip`.
+
+Install the commit hooks once per clone:
+
+```console
+uv run pre-commit install
+```
+
+No activation is required: `uv run` automatically uses the project environment. Do not commit API tokens, local paths, `.venv`, or generated build artifacts.
+
+## Validate changes
+
+Before opening a pull request, run the same local quality gates used by CI:
+
+```console
+uv run pre-commit run --all-files
+uv run ruff format --check .
+uv run ruff check .
+uv run mypy
+uv run pytest
+uv build
+uv run twine check dist/*
+```
+
+The default test suite is offline and deterministic. Live API tests, when available, are marked `integration` and require an `INEGI_TOKEN` supplied through the environment.
+
+## Workflow
+
+Use a short-lived `feature/`, `fix/`, `docs/`, or `chore/` branch. Link an issue and use English Conventional Commits, such as `feat: add catalog client`.
