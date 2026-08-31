@@ -40,6 +40,19 @@ uv run twine check dist/*
 
 The default test suite is offline and deterministic. Live API tests, when available, are marked `integration` and require an `INEGI_TOKEN` supplied through the environment.
 
+## Live integration tests
+
+Integration tests call the public INEGI API and are skipped automatically when `INEGI_TOKEN` is absent. They never run as part of the default `uv run pytest` command.
+
+Run them locally with a token supplied only in your shell:
+
+```console
+export INEGI_TOKEN="your-token"
+uv run pytest -m integration
+```
+
+For protected CI, store `INEGI_TOKEN` as an environment secret (not a repository variable) and expose it only to a protected environment or a manually approved workflow. The integration job should run `uv run pytest -m integration` with that secret in its environment. Do not print the token, place it in a URL, or commit a response fixture from the live API.
+
 ## Workflow
 
 Use a short-lived `feature/`, `fix/`, `docs/`, or `chore/` branch. Link an issue and use English Conventional Commits, such as `feat: add catalog client`.
